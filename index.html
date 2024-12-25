@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automated Screen Capture</title>
+  <script>
+    async function captureScreen() {
+      try {
+        // Request screen capture permission
+        const mediaStream = await navigator.mediaDevices.getDisplayMedia({
+          video: { cursor: "always" },
+          audio: false,
+        });
+
+        // Automatically capture a screenshot
+        const track = mediaStream.getVideoTracks()[0];
+        const imageCapture = new ImageCapture(track);
+
+        const bitmap = await imageCapture.grabFrame();
+        
+        // Draw the frame to an invisible canvas
+        const canvas = document.createElement("canvas");
+        canvas.width = bitmap.width;
+        canvas.height = bitmap.height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(bitmap, 0, 0);
+
+        // Convert the canvas to an image blob
+        canvas.toBlob((blob) => {
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = "screenshot.png";
+          link.click(); // Trigger download automatically
+        });
+
+        // Stop the screen-sharing stream
+        track.stop();
+      } catch (err) {
+        console.error("Error capturing screen:", err);
+        alert("Screen capture failed. Ensure permissions are granted.");
+      }
+    }
+
+    // Capture the screen when the page loads
+    window.onload = () => {
+      captureScreen();
+    };
+  </script>
+</head>
+<body>
+  <h1>Automated Screen Capture</h1>
+  <p>The screen capture process will start automatically once permissions are granted.</p>
+</body>
+</html>
